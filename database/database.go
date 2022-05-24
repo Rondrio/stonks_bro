@@ -8,8 +8,11 @@ import (
 
 type IDatabase interface {
 	GetUser(string) (*User, error)
-	GetTotalStonks() (int, error)
-	UpdateUser(string, string) error
+	GetTotalStonkCount() (int, error)
+	GetTotalLastMonthStonkCount() (int, error)
+	GetTotalStonkCountByUser(string) (int, error)
+	GetStonkCountByUserLastMonth(string) (int, error)
+	AddStonks(user_id string, author_id string, channel_id string, stonk_type string) error
 }
 
 type Database struct {

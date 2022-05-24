@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"log"
+	"stonks_bot/database"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -13,7 +14,7 @@ func (h Handlers) ReactionAdded(s *discordgo.Session, m *discordgo.MessageReacti
 		return
 	}
 
-	total, err := h.db.GetTotalStonks()
+	total, err := h.db.GetTotalStonkCount()
 	if err != nil {
 		log.Println(err)
 		return
@@ -24,13 +25,19 @@ func (h Handlers) ReactionAdded(s *discordgo.Session, m *discordgo.MessageReacti
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Ich habe schon %d Mal gestonkt!", total+1))
 	}
 
+	msg, err := s.ChannelMessage(m.ChannelID, m.MessageID)
+	if err != nil {
+		log.Println(err)
+	}
+
 	user, err := s.User(m.UserID)
 	if err != nil {
 		log.Println(err)
 	}
 
-	err = h.db.UpdateUser(user.ID, user.Username)
+	err = h.db.AddStonks(user.ID, msg.Author.ID, m.ChannelID, database.STONK_TYPE_REACTION)
 	if err != nil {
 		log.Println(err)
 	}
+
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"stonks_bot/database"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -20,10 +21,9 @@ func (h Handlers) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 		return
 	}
 
-	total, err := h.db.GetTotalStonks()
+	total, err := h.db.GetTotalStonkCount()
 	if err != nil {
 		log.Println(err)
-		return
 	}
 
 	if m.ChannelID == "822461092122198097" || m.ChannelID == "776441387876614165" {
@@ -36,7 +36,8 @@ func (h Handlers) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Ich habe schon %d Mal gestonkt!", total+1))
 	}
 
-	err = h.db.UpdateUser(m.Author.ID, m.Author.Username)
+	err = h.db.AddStonks(m.Author.ID, m.Author.ID, m.ChannelID, database.STONK_TYPE_MESSAGE)
+
 	if err != nil {
 		log.Println(err)
 	}
@@ -46,10 +47,36 @@ func (h Handlers) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 func (h Handlers) handleCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	switch strings.ToLower(strings.Fields(m.Content)[0]) {
 	case "!me":
-		user, err := h.db.GetUser(m.Author.ID)
+
+		count, err := h.db.GetTotalStonkCountByUser(m.Author.ID)
 		if err != nil {
 			log.Println(err)
 		}
-		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Bravo! Du hast insgesamt schon %d Mal gestonkt.\nDamit hättest du die Gamestop-Aktien wieder um etwa %.2f%% ansteigen lassen können", user.Stonks_Count, (float64(user.Stonks_Count)*math.Pi)/100))
+
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Bravo! Du hast insgesamt schon %d Mal gestonkt.\nDamit hättest du die Gamestop-Aktien wieder um etwa %.2f%% ansteigen lassen können", count, (float64(count)*math.Pi)/100))
+
+	case "!lastmonth":
+		count, err := h.db.GetTotalLastMonthStonkCount()
+		if err != nil {
+			log.Println(err)
+		}
+
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Im letzten Monat wurde %d Mal gestonkt", count))
+	case "!mylastmonth":
+		count, err := h.db.GetStonkCountByUserLastMonth(m.Author.ID)
+		if err != nil {
+			log.Println(err)
+		}
+
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Du hast im letzten Monat %d Mal gestonkt", count))
+	case "!mytotal":
+		count, err := h.db.GetTotalStonkCountByUser(m.Author.ID)
+		if err != nil {
+			log.Println(err)
+		}
+
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Du hast insgesamt %d Mal gestonkt", count))
+
 	}
+
 }
