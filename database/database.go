@@ -13,6 +13,10 @@ type IDatabase interface {
 	GetTotalStonkCountByUser(string) (int, error)
 	GetStonkCountByUserLastMonth(string) (int, error)
 	AddStonks(user_id string, author_id string, channel_id string, stonk_type string) error
+
+	Unsubscribe(string) error
+	Subscribe(string) error
+	CheckSubscriptionStatus(string) (bool, error)
 }
 
 type Database struct {

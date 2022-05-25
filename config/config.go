@@ -6,8 +6,7 @@ import (
 )
 
 type Config struct {
-	Token  string `json:"token"`
-	Stonks int    `json:"stonks`
+	Token string `json:"token"`
 }
 
 func ReadConfig(path string) (*Config, error) {

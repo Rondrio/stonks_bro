@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -10,7 +9,6 @@ import (
 	"stonks_bot/database"
 	"stonks_bot/handlers"
 	"syscall"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -40,24 +38,6 @@ func main() {
 
 	discord.AddHandler(h.MessageCreate)
 	discord.AddHandler(h.ReactionAdded)
-
-	go func() {
-		t := time.NewTicker(5 * time.Second)
-		for {
-			select {
-			case <-t.C:
-				cfg.Stonks = stonk_counter
-				b, err := json.Marshal(cfg)
-				if err != nil {
-					log.Panic(err)
-				}
-				err = os.WriteFile("config.json", b, 777)
-				if err != nil {
-					log.Panic(err)
-				}
-			}
-		}
-	}()
 
 	// Open a websocket connection to Discord and begin listening.
 	err = discord.Open()

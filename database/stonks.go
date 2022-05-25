@@ -88,10 +88,35 @@ func (db Database) AddStonks(user_id string, author_id string, channel_id string
 	if err != nil {
 		return err
 	}
+
 	_, err = db.conn.Exec("INSERT INTO users (id) VALUES (?) ON DUPLICATE KEY UPDATE name = name ", user_id)
 	if err != nil {
 		return err
 	}
+
+	subscribed := 0
+
+	rows, err := db.conn.Query("SELECT subscribed FROM users WHERE id = ?", user_id)
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		rows.Scan(&subscribed)
+	}
+
+	if subscribed == 0 {
+		return nil
+	}
+
+	rows, err = db.conn.Query("SELECT subscribed FROM users WHERE id = ?", author_id)
+	for rows.Next() {
+		rows.Scan(&subscribed)
+	}
+
+	if subscribed == 0 {
+		return nil
+	}
+
 	_, err = db.conn.Exec("INSERT INTO stonks (user_id, channel_id, message_author_id, type, timestamp) VALUES (?,?,?,?,NOW())", user_id, channel_id, author_id, stonk_type)
 	return err
 }
