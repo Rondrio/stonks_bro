@@ -21,6 +21,7 @@ func SetupHandlers(database database.IDatabase) *Handlers {
 			commands.Help{},
 			commands.LastMonth{},
 			commands.Me{},
+			commands.MyLastMonth{},
 			commands.MyTotal{},
 			commands.Subscribe{},
 			commands.Total{},
